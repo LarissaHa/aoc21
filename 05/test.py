@@ -20,3 +20,9 @@ print(lines(data))
 assert lines(data) == 5
 
 ### PART 2 ###
+
+from src import lines_2
+
+print(lines_2(data))
+
+assert lines_2(data) == 12

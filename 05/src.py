@@ -55,6 +55,72 @@ def lines(data):
 
 ### PART 2 ###
 
+def next_diagonal(x, y, invert_x, invert_y):
+    if invert_x:
+        x -= 1
+    else:
+        x += 1
+    if invert_y:
+        y -= 1
+    else:
+        y += 1
+    return x, y
+
+def print_vecs_2(p, matrix):
+    if p.vec[0] == 0:
+        length = abs(p.vec[1])
+        dim = "y"
+        invert = p.vec[1] < 0
+    elif p.vec[1] == 0:
+        length = abs(p.vec[0])
+        dim = "x"
+        invert = p.vec[0] < 0
+    else:
+        length = abs(p.vec[0])
+        dim = "dia"
+        invert_x = p.vec[0] < 0
+        invert_y = p.vec[1] < 0
+    matrix[p.x1][p.y1] += 1
+    x = p.x1
+    y = p.y1
+    for _ in range(length):
+        if dim == "dia":
+            x, y = next_diagonal(x, y, invert_x, invert_y)
+        else:
+            if invert:
+                if dim == "x":
+                    x -= 1
+                else:
+                    y -= 1
+            else:
+                if dim == "x":
+                    x += 1
+                else:
+                    y += 1
+        matrix[x][y] += 1
+    return matrix
+
+def lines_2(data):
+    data = [d.replace("\n", "") for d in data]
+    # "0,9 -> 5,9" --> ((0,9), (5,9))
+    data = [[
+        int(d.split(" -> ")[0].split(",")[0]), int(d.split(" -> ")[0].split(",")[1]), 
+        int(d.split(" -> ")[1].split(",")[0]), int(d.split(" -> ")[1].split(",")[1])
+    ] for d in data]
+    data = [d for d in data if d[0] == d[2] or d[1] == d[3] or (abs(d[0]-d[2])) == (abs(d[1]-d[3]))]
+    df = pd.DataFrame(data)
+    df.columns = ["x1", "y1", "x2", "y2"]
+    max_x = max(max(df.x1), max(df.x2)) + 1
+    max_y = max(max(df.y1), max(df.y2)) + 1
+    matrix = np.zeros([max_x, max_y])
+    df["vec"] = [(p.x2-p.x1, p.y2-p.y1) for _, p in df.iterrows()]
+    for i, p in df.iterrows():  
+        matrix = print_vecs_2(p, matrix)
+    res = dict(Counter(itertools.chain(*matrix)))
+    print(res)
+    summe = 0
+    summe = [summe+res[s] for s in res if s >= 2]
+    return sum(summe)
 
 ### EXECUTE ###
 
@@ -62,3 +128,5 @@ with open('data.txt') as f:
     data = f.readlines()
 
 print(lines(data))
+
+print(lines_2(data))
